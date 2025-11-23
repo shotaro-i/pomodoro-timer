@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pomodoro timer</title>
+    <title>Pomodoro Timer</title>
     <style>
       body {
         font-family: system-ui;
@@ -37,41 +37,36 @@
     <button id="reset">reset</button>
 
     <script>
-
-  // Specification
-  // - Start button begins a 25-minute countdown
-  // - Stop button pauses the countdown
-  // - Reset button returns the timer to 25:00
-  // - When 25 minutes elapse show an alert
-
-  // Design
-  // - Represent time in seconds (25 minutes -> seconds)
-  // - Update the visible timer display
+      // Specification
+      // - Start button begins a 25-minute countdown
+      // - Stop button pauses the countdown
+      // - Reset button returns the timer to 25:00
+      // - When 25 minutes elapse show an alert
 
       const timerDisplay = document.getElementById("timer");
       const startButton = document.getElementById("start");
       const stopButton = document.getElementById("stop");
       const resetButton = document.getElementById("reset");
 
-  let totalSeconds = 25 * 60; // convert minutes to seconds
+      let totalSeconds = 25 * 60; // convert minutes to seconds
       let intervalId = null;
       let isRunning = false;
 
       function startCountDown() {
+        updateDisplay();
         if (isRunning) return; // ignore if already running
         isRunning = true;
+
         intervalId = setInterval(() => {
           totalSeconds--;
-          const minutes = String(Math.floor(totalSeconds / 60)).padStart(
-            2,
-            "0"
-          );
-          const seconds = String(totalSeconds % 60).padStart(2, "0");
-          timerDisplay.textContent = `${minutes}:${seconds}`;
+          updateDisplay();
           if (totalSeconds <= 0) {
             clearInterval(intervalId);
+            intervalId = null;
             alertTimeUp();
             isRunning = false;
+            totalSeconds = 25 * 60;
+            updateDisplay();
           }
         }, 1000);
       }
@@ -82,13 +77,26 @@
         intervalId = null;
       }
       function resetCountDown() {
+          console.log('resetCountDown called');
         totalSeconds = 25 * 60;
-        timerDisplay.textContent = "25:00";
+        updateDisplay()
         stopCountDown();
       }
       function alertTimeUp() {
-        alert("時間です！");
+        alert("Time's up.!");
       }
+
+      function formatTime(sec) {
+        const s = Math.max(0, sec);
+        const minutes = String(Math.floor(s / 60)).padStart(2, "0");
+        const seconds = String(s % 60).padStart(2, "0");
+        return `${minutes}:${seconds}`;
+      }
+
+      function updateDisplay() {
+        timerDisplay.textContent = formatTime(totalSeconds);
+      }
+
       startButton.addEventListener("click", startCountDown);
       stopButton.addEventListener("click", stopCountDown);
       resetButton.addEventListener("click", resetCountDown);
