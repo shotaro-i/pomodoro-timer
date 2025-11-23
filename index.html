@@ -28,27 +28,109 @@
       button:active {
         opacity: 0.8;
       }
+      .custom {
+        display: inline-block;
+        margin-left: 10px;
+      }
+      #seconds-input {
+        width: 68px;
+        padding: 6px;
+        border-radius: 6px;
+      }
+      /* layout for control groups */
+      .controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      /* main controls (primary actions) */
+      .main-controls button {
+        background: linear-gradient(180deg, #1e90ff, #1a7fe0);
+        color: white;
+        border-radius: 8px;
+        padding: 10px 18px;
+      }
+      /* debug / preset area: visually separate */
+      .debug-controls {
+        border: 1px dashed rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+        padding: 8px 10px;
+        border-radius: 8px;
+        margin-left: 6px;
+      }
+      .debug-controls .presets button,
+      .debug-controls .custom button {
+        background: rgba(255, 255, 255, 0.04);
+        color: #ddd;
+        font-size: 14px;
+        padding: 6px 10px;
+        border-radius: 6px;
+      }
+      .debug-controls input[type="number"] {
+        width: 72px;
+        padding: 6px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.02);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
     </style>
   </head>
   <body>
     <div id="timer">25:00</div>
-    <button id="start">start</button>
-    <button id="stop">stop</button>
-    <button id="reset">reset</button>
+
+    <div class="controls">
+      <!-- main controls -->
+
+      <div class="main-controls">
+        <button type="button" id="start">start</button>
+        <button type="button" id="stop">stop</button>
+        <button type="button" id="reset">reset</button>
+      </div>
+
+      <!-- presets and custom minutes -->
+      <div class="debug-controls">
+        <div class="presets">
+          <button type="button" id="preset-3">3 sec</button>
+          <button type="button" id="preset-60">60 sec</button>
+        </div>
+
+        <div class="custom">
+          <label for="seconds-input" class="visually-hidden">Seconds</label>
+          <input
+            id="seconds-input"
+            type="number"
+            min="1"
+            max="3600"
+            value="1"
+            aria-label="Custom seconds input"
+          />
+          <button type="button" id="apply-seconds">Apply</button>
+        </div>
+      </div>
+    </div>
 
     <script>
-      // Specification
-      // - Start button begins a 25-minute countdown
-      // - Stop button pauses the countdown
-      // - Reset button returns the timer to 25:00
-      // - When 25 minutes elapse show an alert
-
       const timerDisplay = document.getElementById("timer");
       const startButton = document.getElementById("start");
       const stopButton = document.getElementById("stop");
       const resetButton = document.getElementById("reset");
 
-      let totalSeconds = 25 * 60; // convert minutes to seconds
+      // initialSeconds is the configurable start duration (in seconds)
+      let initialSeconds = 25 * 60;
+      let totalSeconds = initialSeconds;
       let intervalId = null;
       let isRunning = false;
 
@@ -65,7 +147,7 @@
             intervalId = null;
             alertTimeUp();
             isRunning = false;
-            totalSeconds = 25 * 60;
+            totalSeconds = initialSeconds;
             updateDisplay();
           }
         }, 1000);
@@ -77,9 +159,8 @@
         intervalId = null;
       }
       function resetCountDown() {
-          console.log('resetCountDown called');
-        totalSeconds = 25 * 60;
-        updateDisplay()
+        totalSeconds = initialSeconds;
+        updateDisplay();
         stopCountDown();
       }
       function alertTimeUp() {
@@ -97,9 +178,48 @@
         timerDisplay.textContent = formatTime(totalSeconds);
       }
 
+      // wire existing buttons
       startButton.addEventListener("click", startCountDown);
       stopButton.addEventListener("click", stopCountDown);
       resetButton.addEventListener("click", resetCountDown);
+
+      // new controls: presets and custom minutes
+      const preset3 = document.getElementById("preset-3");
+      const preset60 = document.getElementById("preset-60");
+      const secondsInput = document.getElementById("seconds-input");
+      const applySeconds = document.getElementById("apply-seconds");
+
+      function setInitialSeconds(seconds) {
+        const s = Math.max(
+          1,
+          Math.min(3600, Math.floor(Number(seconds) || 25))
+        );
+        initialSeconds = s;
+        totalSeconds = initialSeconds;
+        updateDisplay();
+      }
+
+      if (preset3)
+        preset3.addEventListener("click", () => setInitialSeconds(3));
+      if (preset60)
+        preset60.addEventListener("click", () => setInitialSeconds(60));
+      if (applySeconds) {
+        applySeconds.addEventListener("click", () =>
+          setInitialSeconds(secondsInput.value)
+        );
+        initialSeconds = s;
+        totalSeconds = initialSeconds;
+        updateDisplay();
+      }
+
+      if (preset3)
+        preset3.addEventListener("click", () => setInitialSeconds(3));
+      if (preset60)
+        preset60.addEventListener("click", () => setInitialSeconds(60));
+      if (applySeconds)
+        applySeconds.addEventListener("click", () =>
+          setInitialSeconds(secondsInput.value)
+        );
     </script>
   </body>
 </html>
